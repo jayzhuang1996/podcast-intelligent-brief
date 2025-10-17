@@ -1,0 +1,235 @@
+# AI Podcast Monitor - Configuration File
+# Edit this file to customize application behavior
+
+# ============================================================================
+# INTEREST CATEGORIES
+# ============================================================================
+# Available interest tags for personalization
+# Users select 3-5 of these when setting preferences
+interests:
+  available:
+    - tech          # Technology, software, hardware
+    - ai            # Artificial intelligence, machine learning
+    - business      # Business strategy, entrepreneurship
+    - startups      # Startup culture, venture capital
+    - health        # Health, wellness, fitness
+    - science       # Scientific research, discoveries
+    - culture       # Arts, media, entertainment
+    - politics      # Political news, policy
+    - philosophy    # Philosophy, ethics, thinking
+
+  # Default interests for new users
+  default:
+    - tech
+    - ai
+    - business
+
+# ============================================================================
+# SUMMARY SETTINGS
+# ============================================================================
+summary:
+  # Available summary lengths
+  lengths:
+    short: "500-800 words"
+    medium: "1000-1500 words"
+    long: "2000-3000 words"
+
+  # Default length for new users
+  default_length: medium
+
+  # Maximum number of key topics to extract per summary
+  max_key_topics: 7
+
+  # Claude model to use
+  # Options: claude-3-opus, claude-3-sonnet, claude-3-haiku
+  # Sonnet offers best balance of quality and cost
+  model: claude-3-sonnet-20240229
+
+  # Maximum tokens for summary generation
+  # Higher = more detailed but more expensive
+  max_tokens: 2000
+
+# ============================================================================
+# MONITORING SETTINGS
+# ============================================================================
+monitoring:
+  # How often to check channels (hours)
+  # Default: 6 hours (4 checks per day)
+  interval_hours: 6
+
+  # Maximum episodes to fetch per channel per check
+  # Prevents overwhelming system if channel uploads many videos
+  max_episodes_per_check: 5
+
+  # Minimum video duration to process (minutes)
+  # Skip short clips/trailers
+  min_duration_minutes: 30
+
+  # Maximum video duration to process (minutes)
+  # Skip very long streams (expensive to transcribe/summarize)
+  max_duration_minutes: 240  # 4 hours
+
+  # Retry settings for failed operations
+  retry:
+    max_attempts: 3
+    backoff_seconds: 60  # Wait between retries
+
+# ============================================================================
+# TRANSCRIPTION SETTINGS
+# ============================================================================
+transcription:
+  # Caption language preference (yt-dlp auto-detects if not specified)
+  language: en
+
+  # Caption format preference
+  # Options: vtt, srt, json
+  format: vtt
+
+  # Whether to clean transcript (remove timestamps, speaker labels)
+  clean: true
+
+  # Maximum transcript length (characters)
+  # Longer transcripts are truncated to fit Claude's context window
+  max_length: 400000  # ~100K tokens
+
+# ============================================================================
+# DATABASE SETTINGS
+# ============================================================================
+database:
+  # Database connection pool settings
+  pool:
+    size: 5
+    max_overflow: 10
+
+  # Query timeout (seconds)
+  timeout: 30
+
+  # Whether to echo SQL queries (useful for debugging)
+  # WARNING: Very verbose, only use in development
+  echo: false
+
+# ============================================================================
+# API SETTINGS
+# ============================================================================
+api:
+  # API title and description (shown in Swagger UI)
+  title: "AI Podcast Monitor API"
+  description: "Personalized podcast summaries powered by AI"
+  version: "1.0.0"
+
+  # CORS (Cross-Origin Resource Sharing) settings
+  # Allows frontend to access backend from different port
+  cors:
+    allow_origins:
+      - "http://localhost:3000"  # React dev server
+      - "http://localhost:5173"  # Vite default port
+    allow_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+    allow_headers:
+      - "*"
+
+  # Rate limiting (future feature)
+  rate_limit:
+    enabled: false
+    requests_per_minute: 60
+
+# ============================================================================
+# LOGGING SETTINGS
+# ============================================================================
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: INFO
+
+  # Log file location
+  file: logs/app.log
+
+  # Whether to also print logs to console
+  console: true
+
+  # Log rotation settings
+  rotation:
+    enabled: true
+    max_size_mb: 10
+    backup_count: 5  # Keep 5 old log files
+
+  # Log format
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}"
+
+# ============================================================================
+# YOUTUBE / YT-DLP SETTINGS
+# ============================================================================
+youtube:
+  # yt-dlp options
+  # See: https://github.com/yt-dlp/yt-dlp#usage-and-options
+  options:
+    # Quiet mode (less verbose output)
+    quiet: true
+
+    # Don't download video, only metadata and captions
+    skip_download: true
+
+    # Write captions to file
+    write_auto_sub: true
+
+    # Subtitle format
+    sub_format: vtt
+
+    # No warnings
+    no_warnings: false
+
+    # Extract flat playlist (don't get all video details)
+    extract_flat: false
+
+# ============================================================================
+# FRONTEND SETTINGS
+# ============================================================================
+frontend:
+  # Number of episodes to show per page
+  episodes_per_page: 20
+
+  # Auto-refresh interval when episodes are processing (seconds)
+  # Frontend polls for updates
+  refresh_interval: 30
+
+  # Theme
+  default_theme: light  # Options: light, dark, auto
+
+# ============================================================================
+# DEVELOPMENT SETTINGS
+# ============================================================================
+development:
+  # Enable debug mode (auto-reload, detailed errors)
+  # NEVER use in production!
+  debug: true
+
+  # Seed database with dummy data on startup
+  seed_data: false
+
+  # Skip actual YouTube/Claude API calls (for testing)
+  mock_apis: false
+
+# ============================================================================
+# NOTES
+# ============================================================================
+#
+# Configuration Priority:
+# 1. Environment variables (.env) - Highest priority
+# 2. This config file (config.yaml)
+# 3. Hardcoded defaults in code - Lowest priority
+#
+# Example: MONITOR_INTERVAL_HOURS in .env overrides monitoring.interval_hours here
+#
+# Why YAML?
+# - More readable than JSON
+# - Supports comments
+# - Easy to edit manually
+# - Good for complex nested configuration
+#
+# How to use in code:
+# ```python
+# from src.config import settings
+# interval = settings.monitoring.interval_hours
+# ```
